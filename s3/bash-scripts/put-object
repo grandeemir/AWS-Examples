@@ -1,1 +1,15 @@
-#! /usr/env bash
+#! /usr/bin/env bash
+
+#where we'll store these files
+output_dir="/tmp"
+
+# lets create   output folder 
+mkdir -p $output_dir
+
+num_files=$(($RANDOM % 6 + 5))  # Random number between 5 and 10
+
+for ((i=1; i<=num_files; i++)); do
+    file_path="$output_dir/file_$i.txt"
+    echo "This is file number $i" > "$file_path"
+    echo "Created $file_path"
+done

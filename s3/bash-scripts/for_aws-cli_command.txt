@@ -1,0 +1,7 @@
+# if dont run this command on terminal the aws cli isn't working..
+
+export PATH=$HOME/.local/bin:$PATH
+echo 'export PATH=$HOME/.local/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
+
+

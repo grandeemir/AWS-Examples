@@ -1,1 +1,15 @@
-#! /usr/env bash
+#! /usr/bin/env bash
+
+echo "Listing objects"
+
+# Check for bucket name
+
+if [ -z "$1" ]; then
+    echo "No bucket name provided! - please provide a bucket name as the argument."
+    exit 1
+fi
+
+bucket_name=$1
+
+aws s3api list-object-v2 --bucket $bucket_name \
+--output json 
