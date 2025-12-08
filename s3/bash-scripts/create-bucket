@@ -1,17 +1,43 @@
 #! /usr/bin/env bash
 
-echo "Creating S3 bucket..."
+# Script to create an S3 bucket
 
 # Check for bucket name
-
 if [ -z "$1" ]; then
-    echo "No bucket name provided! - please provide a bucket name as the argument."
+    echo "Usage: $0 <bucket-name> [region] [--help]"
+    echo "Provide the name of the S3 bucket as the first argument."
+    echo "Optionally, specify the AWS region as the second argument."
     exit 1
 fi
 
-bucket_name=$1
+# Help option
+if [ "$1" == "--help" ]; then
+    echo "Usage: $0 <bucket-name> [region]"
+    echo "This script creates an S3 bucket with the specified name."
+    echo "Example: $0 my-bucket-name us-west-1"
+    exit 0
+fi
 
-aws s3api create-bucket --bucket $bucket_name \
---create-bucket-configuration="LocationConstraint=eu-central-1" \
---query 'Location' \
---output json
+bucket_name=$1
+region=${2:-"eu-central-1"} # Default region is eu-central-1
+
+# Create the bucket
+output=$(aws s3api create-bucket --bucket "$bucket_name" \
+--create-bucket-configuration LocationConstraint="$region" \
+--query 'Location' --output json 2>&1)
+
+# Check if the AWS CLI command was successful
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to create bucket '$bucket_name' in region '$region'."
+    echo "Details: $output"
+    exit 1
+fi
+
+# Display success message
+if command -v jq &> /dev/null; then
+    echo "Bucket '$bucket_name' created successfully in region '$region'."
+    echo "$output" | jq
+else
+    echo "Bucket '$bucket_name' created successfully in region '$region'."
+    echo "Raw output: $output"
+fi

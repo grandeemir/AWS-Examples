@@ -1,15 +1,46 @@
 #! /usr/bin/env bash
 
-echo "Deleting S3 bucket..."
+# Script to delete an S3 bucket
 
 # Check for bucket name
-
 if [ -z "$1" ]; then
-    echo "No bucket name provided! - please provide a bucket name as the argument."
+    echo "Usage: $0 <bucket-name> [--help]"
+    echo "Provide the name of the S3 bucket as the first argument."
     exit 1
+fi
+
+# Help option
+if [ "$1" == "--help" ]; then
+    echo "Usage: $0 <bucket-name>"
+    echo "This script deletes the specified S3 bucket."
+    echo "Example: $0 my-bucket-name"
+    exit 0
 fi
 
 bucket_name=$1
 
-aws s3api delete-bucket --bucket $bucket_name \
---output json 
+# Confirm deletion
+read -p "Are you sure you want to delete the bucket '$bucket_name'? This action cannot be undone. (yes/no): " confirmation
+if [ "$confirmation" != "yes" ]; then
+    echo "Bucket deletion cancelled."
+    exit 0
+fi
+
+# Delete the bucket
+output=$(aws s3api delete-bucket --bucket "$bucket_name" --output json 2>&1)
+
+# Check if the AWS CLI command was successful
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to delete bucket '$bucket_name'."
+    echo "Details: $output"
+    exit 1
+fi
+
+# Display success message
+if command -v jq &> /dev/null; then
+    echo "Bucket '$bucket_name' deleted successfully."
+    echo "$output" | jq
+else
+    echo "Bucket '$bucket_name' deleted successfully."
+    echo "Raw output: $output"
+fi

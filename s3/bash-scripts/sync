@@ -1,1 +1,55 @@
-#! /usr/env bash
+#! /usr/bin/env bash
+
+# Script to sync files between a local directory and an S3 bucket
+
+# Display usage information
+function show_help() {
+    echo "Usage: $0 <local-dir> <bucket-name> [--to-s3|--from-s3] [--help]"
+    echo "Synchronize files between a local directory and an S3 bucket."
+    echo "Options:"
+    echo "  --to-s3     Sync from local directory to S3 bucket (default)."
+    echo "  --from-s3   Sync from S3 bucket to local directory."
+    echo "  --help      Show this help message."
+    exit 0
+}
+
+# Check for help option
+if [[ "$1" == "--help" || -z "$1" || -z "$2" ]]; then
+    show_help
+fi
+
+local_dir=$1
+bucket_name=$2
+sync_direction="to-s3" # Default direction
+
+# Check for sync direction
+if [[ "$3" == "--from-s3" ]]; then
+    sync_direction="from-s3"
+elif [[ "$3" == "--to-s3" ]]; then
+    sync_direction="to-s3"
+fi
+
+# Validate local directory
+if [ ! -d "$local_dir" ]; then
+    echo "Error: Local directory '$local_dir' does not exist."
+    exit 1
+fi
+
+# Perform sync based on direction
+if [ "$sync_direction" == "to-s3" ]; then
+    echo "Syncing from local directory '$local_dir' to S3 bucket '$bucket_name'..."
+    output=$(aws s3 sync "$local_dir" "s3://$bucket_name" 2>&1)
+else
+    echo "Syncing from S3 bucket '$bucket_name' to local directory '$local_dir'..."
+    output=$(aws s3 sync "s3://$bucket_name" "$local_dir" 2>&1)
+fi
+
+# Check if the AWS CLI command was successful
+if [ $? -ne 0 ]; then
+    echo "Error: Sync operation failed."
+    echo "Details: $output"
+    exit 1
+fi
+
+# Display success message
+echo "Sync operation completed successfully."

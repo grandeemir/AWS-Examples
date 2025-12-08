@@ -1,4 +1,4 @@
-# if dont run this command on terminal the aws cli isn't working..
+# if the aws cli cloudn't working, you must run these codes on the terminal..
 
 export PATH=$HOME/.local/bin:$PATH
 echo 'export PATH=$HOME/.local/bin:$PATH' >> ~/.bashrc

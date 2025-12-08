@@ -1,0 +1,39 @@
+#! /usr/bin/env bash
+
+# Script to list objects in an S3 bucket
+
+# Check for bucket name
+if [ -z "$1" ]; then
+    echo "Usage: $0 <bucket-name> [--help]"
+    echo "Provide the name of the S3 bucket as the first argument."
+    exit 1
+fi
+
+# Help option
+if [ "$1" == "--help" ]; then
+    echo "Usage: $0 <bucket-name>"
+    echo "This script lists objects in the specified S3 bucket."
+    echo "Example: $0 my-bucket-name"
+    exit 0
+fi
+
+bucket_name=$1
+
+# List objects in the bucket
+output=$(aws s3api list-objects-v2 --bucket "$bucket_name" --output json 2>&1)
+
+# Check if the AWS CLI command was successful
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to list objects in bucket '$bucket_name'."
+    echo "Details: $output"
+    exit 1
+fi
+
+# Process and display the output
+if command -v jq &> /dev/null; then
+    echo "Objects in bucket '$bucket_name':"
+    echo "$output" | jq '.Contents[] | {Key, Size, LastModified}'
+else
+    echo "jq is not installed. Showing raw JSON output:"
+    echo "$output"
+fi
