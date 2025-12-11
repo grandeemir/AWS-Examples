@@ -1,5 +1,7 @@
 # AWS Examples
 
+![alt text](aws-cli-image.png)
+
 A collection of practical AWS CLI examples and bash scripts for AWS S3 bucket management. This project is a learning resource for AWS SAA-C03 exam preparation.
 
 ## Overview
